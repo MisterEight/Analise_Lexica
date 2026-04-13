@@ -1,0 +1,108 @@
+digraph MicroPascalAFD {
+    rankdir=LR;
+    fontname="Helvetica";
+    node [fontname="Helvetica"];
+    edge [fontname="Helvetica"];
+
+    /* Estado invisível para a seta inicial */
+    __start__ [shape=none, label=""];
+
+    /* Estados não-finais */
+    node [shape=circle];
+    S_START   [label="S_START"];
+    S_COMMENT [label="S_COMMENT"];
+    N_DOT     [label="N_DOT"];
+    N_E       [label="N_E"];
+    N_ESIGN   [label="N_ESIGN"];
+    S_LT      [label="S_LT"];
+    S_GT      [label="S_GT"];
+    S_COL     [label="S_COL"];
+
+    /* Estados de erro */
+    node [shape=circle, style=dashed];
+    ERR [label="ERRO"];
+
+    /* Estados finais (duplo círculo) */
+    node [shape=doublecircle, style=solid];
+    S_ID    [label="S_ID\n(ID/KW)"];
+    N_INT   [label="N_INT\n(NUM_INT)"];
+    N_REAL  [label="N_REAL\n(NUM_REAL)"];
+    N_EXP   [label="N_EXP\n(NUM_REAL)"];
+
+    /* Estados finais de operadores (aceite imediato) */
+    node [shape=doublecircle, style=solid];
+    ACC_EQ  [label="OP_EQ"];
+    ACC_ADD [label="OP_ADD"];
+    ACC_MIN [label="OP_MIN"];
+    ACC_MUL [label="OP_MUL"];
+    ACC_DIV [label="OP_DIV"];
+    ACC_SEM [label="SMB_SEM"];
+    ACC_COM [label="SMB_COM"];
+    ACC_OPA [label="SMB_OPA"];
+    ACC_CPA [label="SMB_CPA"];
+    ACC_DOT [label="SMB_DOT"];
+    ACC_LT  [label="OP_LT"];
+    ACC_LE  [label="OP_LE"];
+    ACC_NE  [label="OP_NE"];
+    ACC_GT  [label="OP_GT"];
+    ACC_GE  [label="OP_GE"];
+    ACC_COL [label="SMB_COL"];
+    ACC_ASS [label="OP_ASS"];
+
+    /* ---- Seta inicial ---- */
+    __start__ -> S_START;
+
+    /* ---- Whitespace (laço interno, não representado para clareza) ---- */
+
+    /* ---- Comentários ---- */
+    S_START   -> S_COMMENT [label="{"];
+    S_COMMENT -> S_COMMENT [label="outro"];
+    S_COMMENT -> S_START   [label="}"];
+    S_COMMENT -> ERR       [label="EOF\n(não fechado)"];
+
+    /* ---- Identificadores e palavras reservadas ---- */
+    S_START -> S_ID [label="letra"];
+    S_ID    -> S_ID [label="letra | dígito"];
+
+    /* ---- Números ---- */
+    S_START -> N_INT   [label="dígito"];
+    N_INT   -> N_INT   [label="dígito"];
+    N_INT   -> N_DOT   [label="'.' (próx=dígito)"];
+    N_DOT   -> N_REAL  [label="dígito"];
+    N_REAL  -> N_REAL  [label="dígito"];
+    N_INT   -> N_E     [label="E"];
+    N_REAL  -> N_E     [label="E"];
+    N_E     -> N_ESIGN [label="'+' | '-'"];
+    N_E     -> N_EXP   [label="dígito"];
+    N_ESIGN -> N_EXP   [label="dígito"];
+    N_EXP   -> N_EXP   [label="dígito"];
+
+    /* ---- Operadores com lookahead ---- */
+    S_START -> S_LT    [label="<"];
+    S_LT    -> ACC_LE  [label="="];
+    S_LT    -> ACC_NE  [label=">"];
+    S_LT    -> ACC_LT  [label="outro (putback)"];
+
+    S_START -> S_GT    [label=">"];
+    S_GT    -> ACC_GE  [label="="];
+    S_GT    -> ACC_GT  [label="outro (putback)"];
+
+    S_START -> S_COL   [label=":"];
+    S_COL   -> ACC_ASS [label="="];
+    S_COL   -> ACC_COL [label="outro (putback)"];
+
+    /* ---- Tokens de um único caractere ---- */
+    S_START -> ACC_EQ  [label="="];
+    S_START -> ACC_ADD [label="+"];
+    S_START -> ACC_MIN [label="-"];
+    S_START -> ACC_MUL [label="*"];
+    S_START -> ACC_DIV [label="/"];
+    S_START -> ACC_SEM [label=";"];
+    S_START -> ACC_COM [label=","];
+    S_START -> ACC_OPA [label="("];
+    S_START -> ACC_CPA [label=")"];
+    S_START -> ACC_DOT [label="."];
+
+    /* ---- Caractere inválido ---- */
+    S_START -> ERR [label="outro\n(inválido)"];
+}

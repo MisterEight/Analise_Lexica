@@ -1,0 +1,20 @@
+# Arquivos do enunciado (não devem ir ao repo)
+MicroPascal.pdf
+codigo_exemplo.txt
+"Trabalho prático - parte 01 - Analisador Léxico.pdf"
+plano.md
+
+# Binários compilados
+*.exe
+*.o
+
+# Saídas geradas pelo lexer
+test/*.lex
+test/*.err
+test/*.ts
+
+# Configurações pessoais do editor
+.vscode/
+
+# Arquivos do Claude Code
+.claude/
